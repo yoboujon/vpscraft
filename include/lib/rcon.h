@@ -1,0 +1,6 @@
+#ifndef VPSCRAFT_RCON
+#define VPSCRAFT_RCON
+
+
+
+#endif // VPSCRAFT_RCON
