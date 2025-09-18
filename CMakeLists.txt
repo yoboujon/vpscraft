@@ -19,8 +19,9 @@ set(TARGET "${APP_NAME_LOW}_lib")
 set(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/lib")
 add_library(
 	${TARGET} SHARED
-    ${SOURCES}/socket.cpp
-	${SOURCES}/rcon.cpp
+    ${SOURCES}/error.c
+    ${SOURCES}/socket.c
+	${SOURCES}/rcon.c
 )
 target_include_directories(
 	${TARGET} PUBLIC
