@@ -14,14 +14,12 @@ set(APP_NAME "VPSCraft")
 string(TOLOWER "${APP_NAME}" APP_NAME_LOW)
 set(QT_SUBDIR "ui")
 
-# lib
+# Shared library
 set(TARGET "${APP_NAME_LOW}_lib")
-set(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/lib")
+set(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src")
 add_library(
 	${TARGET} SHARED
-    ${SOURCES}/error.c
-    ${SOURCES}/socket.c
-	${SOURCES}/rcon.c
+	${SOURCES}/lib.cpp
 )
 target_include_directories(
 	${TARGET} PUBLIC
@@ -30,19 +28,8 @@ target_include_directories(
 set_target_properties(${TARGET} PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
 set_target_properties(${TARGET} PROPERTIES OUTPUT_NAME ${APP_NAME_LOW})
 
-# cli
-set(TARGET "${APP_NAME_LOW}_cli")
-set(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/cli")
-add_executable(
-	${TARGET}
-    ${SOURCES}/main.cpp
-)
-target_link_libraries(
-    ${TARGET}
-    "${APP_NAME_LOW}_lib"
-)
-
-# ui
+# Executable
 include(cmake/qt.cmake)
 
+# Installer
 include(cmake/cpack.cmake)

@@ -1,10 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-set(TARGET ${APP_NAME_LOW})
-set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
-
+set(TARGET ${APP_NAME})
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -45,6 +41,10 @@ target_link_libraries(
     ${TARGET} PRIVATE 
     Qt${QT_VERSION_MAJOR}::Widgets
     ${APP_NAME_LOW}_lib
+)
+target_include_directories(
+    ${TARGET} PRIVATE
+    "${PROJECT_SOURCE_DIR}/include"
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
