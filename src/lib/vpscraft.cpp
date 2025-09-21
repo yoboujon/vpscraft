@@ -28,9 +28,10 @@ void VPSCraft::update()
     }
 }
 
-bool VPSCraft::get_active(const std::string &str)
+bool VPSCraft::get_active(const std::string &str, bool update)
 {
-    this->update();
+    if(update)
+        this->update();
     return _active[str];
 }
 
@@ -38,4 +39,10 @@ std::unordered_map<std::string, bool>& VPSCraft::get_active_list()
 {
     this->update();
     return _active;
+}
+
+void VPSCraft::set_instance(const std::string& instance, bool on)
+{
+    const std::string cmd = std::string("systemctl ")+(on ? "start" : "stop")+" "+instance;
+    _ssh.send_cmd(cmd.c_str());
 }
