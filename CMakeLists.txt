@@ -14,9 +14,12 @@ set(APP_NAME "VPSCraft")
 string(TOLOWER "${APP_NAME}" APP_NAME_LOW)
 set(QT_SUBDIR "ui")
 
+# Dependencies
+find_package(libssh CONFIG REQUIRED)
+
 # Shared library
 set(TARGET "${APP_NAME_LOW}_lib")
-set(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src")
+set(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/lib")
 add_library(
 	${TARGET} SHARED
 	${SOURCES}/lib.cpp
@@ -25,10 +28,27 @@ target_include_directories(
 	${TARGET} PUBLIC
 	"${CMAKE_CURRENT_SOURCE_DIR}/include"
 )
+target_link_libraries(
+    ${TARGET} PUBLIC
+    ssh
+)
 set_target_properties(${TARGET} PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
 set_target_properties(${TARGET} PROPERTIES OUTPUT_NAME ${APP_NAME_LOW})
 
-# Executable
+# CLI Executable
+set(TARGET "${APP_NAME_LOW}_cli")
+set(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/cli")
+add_executable(
+	${TARGET}
+	${SOURCES}/main.cpp
+)
+target_link_libraries(
+    ${TARGET} PRIVATE
+    "${APP_NAME_LOW}_lib"
+    ssh
+)
+
+# UI Executable
 include(cmake/qt.cmake)
 
 # Installer
