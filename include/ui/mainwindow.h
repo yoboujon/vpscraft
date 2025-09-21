@@ -5,6 +5,7 @@
 #include <QMessageBox>
 
 #include "ui/errorwindow.h"
+#include "ui/connect.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui
@@ -27,5 +28,7 @@ private:
 
     Ui::MainWindow *ui;
     QMessageBox error;
+    ConnectWorker* connectWorker;
+    QThread* thread;
 };
 #endif // MAINWINDOW_H
