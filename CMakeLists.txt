@@ -22,7 +22,8 @@ set(TARGET "${APP_NAME_LOW}_lib")
 set(SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/lib")
 add_library(
 	${TARGET} SHARED
-	${SOURCES}/lib.cpp
+    ${SOURCES}/error.cpp
+	${SOURCES}/ssh.cpp
 )
 target_include_directories(
 	${TARGET} PUBLIC

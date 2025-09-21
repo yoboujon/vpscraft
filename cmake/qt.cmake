@@ -12,6 +12,9 @@ set(PROJECT_SOURCES
         src/${QT_SUBDIR}/mainwindow.cpp
         src/${QT_SUBDIR}/mainwindow.ui
         include/${QT_SUBDIR}/mainwindow.h
+        src/${QT_SUBDIR}/errorwindow.cpp
+        src/${QT_SUBDIR}/errorwindow.ui
+        include/${QT_SUBDIR}/errorwindow.h
         res/res.qrc
 )
 
@@ -42,10 +45,6 @@ target_link_libraries(
     ${TARGET} PRIVATE 
     Qt${QT_VERSION_MAJOR}::Widgets
     ${APP_NAME_LOW}_lib
-)
-target_include_directories(
-    ${TARGET} PRIVATE
-    "${PROJECT_SOURCE_DIR}/include"
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.

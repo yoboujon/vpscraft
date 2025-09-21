@@ -2,10 +2,14 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QMessageBox>
+
+#include "ui/errorwindow.h"
 
 QT_BEGIN_NAMESPACE
-namespace Ui {
-class MainWindow;
+namespace Ui
+{
+    class MainWindow;
 }
 QT_END_NAMESPACE
 
@@ -18,6 +22,10 @@ public:
     ~MainWindow();
 
 private:
+    void setError(const std::string &title, const std::string &description);
+    void onSSHClicked();
+
     Ui::MainWindow *ui;
+    QMessageBox error;
 };
 #endif // MAINWINDOW_H

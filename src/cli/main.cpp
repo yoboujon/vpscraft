@@ -1,9 +1,22 @@
 #include <iostream>
 
-#include "lib/lib.h"
+#include "lib/ssh.h"
+#include "lib/error.h"
 
 int main(void)
 {
-    std::cout << connect_ssh() << std::endl;
+    try
+    {
+        connect_ssh();
+    }
+    catch (const VPSError &err)
+    {
+        std::cerr << err.what() << std::endl;
+        if (!err.more().empty())
+            std::cerr << "Reason: " << err.more() << std::endl;
+        return err.code();
+    }
+
+    std::cout << "Connection success!" << std::endl;
     return 0;
 }
