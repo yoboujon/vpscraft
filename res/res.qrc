@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/res">
+        <file>icon.ico</file>
+        <file>atm.png</file>
+        <file>craft2exile.png</file>
+        <file>radio_off.png</file>
+        <file>radio_on.png</file>
+        <file>radio_wait.png</file>
+        <file>radio_unknown.png</file>
+    </qresource>
+</RCC>

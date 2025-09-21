@@ -12,6 +12,7 @@ set(PROJECT_SOURCES
         src/${QT_SUBDIR}/mainwindow.cpp
         src/${QT_SUBDIR}/mainwindow.ui
         include/${QT_SUBDIR}/mainwindow.h
+        res/res.qrc
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
