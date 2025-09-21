@@ -2,8 +2,9 @@
 #include "./ui_mainwindow.h"
 
 #include <QApplication>
+#include <QTimer>
+#include <unordered_map>
 
-#include "lib/ssh.h"
 #include "lib/error.h"
 
 MainWindow::MainWindow(QWidget *parent)
@@ -15,7 +16,10 @@ MainWindow::MainWindow(QWidget *parent)
     error.setIcon(QMessageBox::Critical);
     error.setWindowTitle("Error Occurred");
     error.setWindowIcon(QIcon(QString::fromUtf8(":/res/icon.ico")));
-    
+    // Setup Message
+    info.setIcon(QMessageBox::Information);
+    info.setWindowIcon(QIcon(QString::fromUtf8(":/res/icon.ico")));
+
     // Thread handlers
     connectWorker->set(ui->labelSSH, ui->imgSSH);
     connectWorker->moveToThread(thread);
@@ -25,6 +29,27 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Event handlers
     MainWindow::connect(ui->connectSSH, &QPushButton::clicked, this, &MainWindow::onSSHClicked);
+
+    // Testing purposes
+    _instances["craft2exile"] = {
+        ui->buttonCTE2,
+        ui->imgStatusCTE2,
+        ui->statusCTE2,
+    };
+    _instances["atm10"] = {
+        ui->buttonATM,
+        ui->imgStatusATM,
+        ui->statusATM,
+    };
+
+    for (const auto &i : _instances)
+    {
+        MainWindow::connect(i.second.button, &QPushButton::clicked, this,
+                            [this, i]()
+                            {
+                                this->onStarted(i.first.c_str());
+                            });
+    }
 }
 
 MainWindow::~MainWindow()
@@ -38,14 +63,44 @@ void MainWindow::setError(const std::string &title, const std::string &descripti
     error.setInformativeText(QString::fromUtf8(description));
 }
 
+void MainWindow::updateInstances()
+{
+    const auto list = vps.get_active_list();
+    const QPixmap on(":/res/radio_on.png"), off(":/res/radio_off.png");
+
+    for (const auto &l : list)
+    {
+        auto it = _instances.find(l.first);
+        if (it == _instances.end())
+            continue;
+        if (l.second)
+        {
+            it->second.icon->setPixmap(on);
+            it->second.text->setText(" Started");
+            it->second.button->setDisabled(true);
+        }
+        else
+        {
+            it->second.icon->setPixmap(off);
+            it->second.text->setText(" Stopped");
+            it->second.button->setDisabled(false);
+        }
+    }
+}
+
 void MainWindow::onSSHClicked()
 {
+    info.setWindowTitle("Connecting through ssh...");
+    info.setText(QString::fromUtf8("Connecting to 'mc.etheryo.fr'..."));
+    info.show();
+    QCoreApplication::processEvents();
     try
     {
-        vps.init("mc.etheryo.fr","root");
+        vps.init("mc.etheryo.fr", "root");
     }
     catch (const VPSError &err)
     {
+        info.close();
         if (!err.more().empty())
             setError(err.what(), err.more());
         else
@@ -54,7 +109,37 @@ void MainWindow::onSSHClicked()
         error.exec();
         return;
     }
+
+    // Successful
     ui->imgSSH->setPixmap(QPixmap(":/res/radio_on.png"));
     ui->labelSSH->setText("Connected");
     ui->connectSSH->setDisabled(true);
+    updateInstances();
+    info.close();
+}
+
+void MainWindow::onStarted(const char *instance)
+{
+    info.setWindowTitle("Starting Instance...");
+    info.setText(QString::fromUtf8(std::string("Starting '") + instance + "'..."));
+    info.show();
+    QCoreApplication::processEvents();
+    // Disabling buttons, setting instance
+    for (const auto &i : _instances)
+    {
+        i.second.button->setDisabled(true);
+        vps.set_instance(i.first, false);
+    }
+    vps.set_instance(instance, true);
+
+    QTimer *timer = new QTimer(this);
+    connect(timer, &QTimer::timeout, this, [this, timer, instance]()
+            {
+    if (vps.get_active(instance)) {
+        info.close();
+        updateInstances();
+        timer->stop();
+        timer->deleteLater();
+    } });
+    timer->start(300);
 }
