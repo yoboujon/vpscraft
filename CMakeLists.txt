@@ -24,6 +24,7 @@ add_library(
 	${TARGET} SHARED
     ${SOURCES}/error.cpp
 	${SOURCES}/ssh.cpp
+    ${SOURCES}/vpscraft.cpp
 )
 target_include_directories(
 	${TARGET} PUBLIC

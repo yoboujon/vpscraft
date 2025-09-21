@@ -1,15 +1,16 @@
 #include "lib/ssh.h"
 #include "lib/error.h"
 
-#include <iostream>
+#include <cstring>
 
-#define BUFFER_SIZE 1024
+#define BUFFER_SIZE 256
 static int PORT = 22;
 static char BUFFER[BUFFER_SIZE];
 
 SSH::SSH() noexcept
     : _port(22), _session(nullptr), _channel(nullptr)
 {
+    std::memset(BUFFER, 0, BUFFER_SIZE);
 }
 
 SSH::~SSH() noexcept
@@ -27,7 +28,7 @@ SSH::~SSH() noexcept
     }
 }
 
-void SSH::connect()
+void SSH::connect(const char *host, const char *user)
 {
     std::string reason;
     _session = ssh_new();
@@ -35,8 +36,8 @@ void SSH::connect()
     if (_session == NULL)
         throw VPSError(VPSErrorEnum::SSH_SESSION_FAIL);
 
-    ssh_options_set(_session, SSH_OPTIONS_HOST, "mc.etheryo.fr");
-    ssh_options_set(_session, SSH_OPTIONS_USER, "root");
+    ssh_options_set(_session, SSH_OPTIONS_HOST, host);
+    ssh_options_set(_session, SSH_OPTIONS_USER, user);
     ssh_options_set(_session, SSH_OPTIONS_PORT, &PORT);
     if (ssh_connect(_session) != SSH_OK)
     {
@@ -67,8 +68,8 @@ void SSH::send_cmd(const char *cmd) noexcept
 {
     _stdout.clear();
     _stderr.clear();
-
     _channel = ssh_channel_new(_session);
+    
     ssh_channel_open_session(_channel);
     ssh_channel_request_exec(_channel, cmd);
     int nbytes;
@@ -78,18 +79,26 @@ void SSH::send_cmd(const char *cmd) noexcept
     while ((nbytes = ssh_channel_read(_channel, BUFFER, BUFFER_SIZE, 1)) > 0)
         _stderr.append(BUFFER);
 
+    // clearing the channel
     ssh_channel_send_eof(_channel);
     ssh_channel_close(_channel);
     ssh_channel_free(_channel);
     _channel = nullptr;
+    std::memset(BUFFER, 0, BUFFER_SIZE);
+
+    // removing last '\n'
+    if (!_stdout.empty() && _stdout.back() == '\n')
+        _stdout.pop_back();
+    if (!_stderr.empty() && _stderr.back() == '\n')
+        _stderr.pop_back();
 }
 
-std::string& SSH::get_stdout() noexcept
+std::string &SSH::get_stdout() noexcept
 {
     return _stdout;
 }
 
-std::string& SSH::get_stderr() noexcept
+std::string &SSH::get_stderr() noexcept
 {
     return _stderr;
 }

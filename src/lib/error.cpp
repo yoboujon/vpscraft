@@ -17,12 +17,12 @@ VPSError::VPSError(VPSErrorEnum code, const std::string& arg)
 {
 }
 
-int VPSError::code() const
+int VPSError::code() const noexcept
 {
     return _code;
 }
 
-std::string VPSError::more() const
+const std::string& VPSError::more() const noexcept
 {
     return _more;
 }

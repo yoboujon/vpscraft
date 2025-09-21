@@ -16,8 +16,8 @@ class VPSError : public std::exception
 {
 public:
     VPSError(VPSErrorEnum code, const std::string& arg="");
-    int code() const;
-    std::string more() const;
+    int code() const noexcept;
+    const std::string& more() const noexcept;
 private:
     int _code;
     std::string _more;

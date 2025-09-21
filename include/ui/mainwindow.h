@@ -6,6 +6,7 @@
 
 #include "ui/errorwindow.h"
 #include "ui/connect.h"
+#include "lib/vpscraft.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui
@@ -27,6 +28,7 @@ private:
     void onSSHClicked();
 
     Ui::MainWindow *ui;
+    VPSCraft vps;
     QMessageBox error;
     ConnectWorker* connectWorker;
     QThread* thread;

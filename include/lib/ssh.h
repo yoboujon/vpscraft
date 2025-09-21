@@ -8,7 +8,7 @@ class SSH {
 public:
     SSH() noexcept;
     ~SSH() noexcept;
-    void connect();
+    void connect(const char* host, const char* user);
     void send_cmd(const char* cmd) noexcept;
     std::string& get_stdout() noexcept;
     std::string& get_stderr() noexcept;

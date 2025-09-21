@@ -1,14 +1,14 @@
 #include <iostream>
 
-#include "lib/ssh.h"
+#include "lib/vpscraft.h"
 #include "lib/error.h"
 
 int main(void)
 {
-    SSH ssh;
+    VPSCraft vps;
     try
     {
-        ssh.connect();
+        vps.init("mc.etheryo.fr", "root");
     }
     catch (const VPSError &err)
     {
@@ -18,10 +18,8 @@ int main(void)
         return err.code();
     }
 
-    std::cout << "Connection success!" << std::endl;
-    ssh.send_cmd("systemctl is-active craft2exile");
-    std::cout << "ssh: " << ssh.get_stdout() << std::endl;
-    ssh.send_cmd("systemctl is-active atm10");
-    std::cout << "ssh: " << ssh.get_stdout() << std::endl;
+    auto list = vps.get_active_list();
+    for(const auto& l : list)
+        std::cout << l.first << ": " << (l.second ? "on" : "off") << std::endl;
     return 0;
 }

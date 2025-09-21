@@ -40,10 +40,9 @@ void MainWindow::setError(const std::string &title, const std::string &descripti
 
 void MainWindow::onSSHClicked()
 {
-    /*
     try
     {
-        // connect_ssh();
+        vps.init("mc.etheryo.fr","root");
     }
     catch (const VPSError &err)
     {
@@ -55,7 +54,6 @@ void MainWindow::onSSHClicked()
         error.exec();
         return;
     }
-    */
     ui->imgSSH->setPixmap(QPixmap(":/res/radio_on.png"));
     ui->labelSSH->setText("Connected");
     ui->connectSSH->setDisabled(true);
