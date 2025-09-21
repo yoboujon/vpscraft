@@ -3,9 +3,18 @@
 
 #include <QApplication>
 #include <QTimer>
+#include <QGraphicsColorizeEffect>
 #include <unordered_map>
 
 #include "lib/error.h"
+
+static inline void _set_effect(QLabel *label, const QColor &c)
+{
+    auto effect = new QGraphicsColorizeEffect(label);
+    effect->setColor(c);
+    effect->setStrength(0.8);
+    label->setGraphicsEffect(effect);
+}
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::MainWindow), connectWorker(new ConnectWorker), thread(new QThread)
@@ -33,11 +42,13 @@ MainWindow::MainWindow(QWidget *parent)
     // Testing purposes
     _instances["craft2exile"] = {
         ui->buttonCTE2,
+        ui->imgCTE2,
         ui->imgStatusCTE2,
         ui->statusCTE2,
     };
     _instances["atm10"] = {
         ui->buttonATM,
+        ui->imgATM,
         ui->imgStatusATM,
         ui->statusATM,
     };
@@ -49,6 +60,7 @@ MainWindow::MainWindow(QWidget *parent)
                             {
                                 this->onStarted(i.first.c_str());
                             });
+        _set_effect(i.second.img, Qt::darkGray);
     }
 }
 
@@ -75,12 +87,14 @@ void MainWindow::updateInstances()
             continue;
         if (l.second)
         {
+            it->second.img->setGraphicsEffect(nullptr);
             it->second.icon->setPixmap(on);
             it->second.text->setText(" Started");
             it->second.button->setDisabled(true);
         }
         else
         {
+            _set_effect(it->second.img, Qt::darkGray);
             it->second.icon->setPixmap(off);
             it->second.text->setText(" Stopped");
             it->second.button->setDisabled(false);

@@ -11,6 +11,7 @@
 
 struct VPSInstance {
     QPushButton* button;
+    QLabel* img;
     QLabel* icon;
     QLabel* text;
 };
