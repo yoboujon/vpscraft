@@ -14,6 +14,12 @@ set(APP_NAME "VPSCraft")
 string(TOLOWER "${APP_NAME}" APP_NAME_LOW)
 set(QT_SUBDIR "ui")
 
+if(WIN32)
+    set(RESOURCE_FILE "${CMAKE_CURRENT_SOURCE_DIR}/res/resources.rc")
+else()
+    set(RESOURCE_FILE "")
+endif()
+
 # Dependencies
 find_package(libssh CONFIG REQUIRED)
 
