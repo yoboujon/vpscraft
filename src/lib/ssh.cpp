@@ -1,79 +1,95 @@
 #include "lib/ssh.h"
 #include "lib/error.h"
 
-#include "libssh/libssh.h"
+#include <iostream>
 
-#include <string>
-
+#define BUFFER_SIZE 1024
 static int PORT = 22;
+static char BUFFER[BUFFER_SIZE];
 
-void connect_ssh()
+SSH::SSH() noexcept
+    : _port(22), _session(nullptr), _channel(nullptr)
+{
+}
+
+SSH::~SSH() noexcept
+{
+    if (_channel != nullptr)
+    {
+        ssh_channel_send_eof(_channel);
+        ssh_channel_close(_channel);
+        ssh_channel_free(_channel);
+    }
+    if (_session != nullptr)
+    {
+        ssh_disconnect(_session);
+        ssh_free(_session);
+    }
+}
+
+void SSH::connect()
 {
     std::string reason;
-    ssh_session session = ssh_new();
-    if (session == NULL)
+    _session = ssh_new();
+
+    if (_session == NULL)
         throw VPSError(VPSErrorEnum::SSH_SESSION_FAIL);
 
-    ssh_options_set(session, SSH_OPTIONS_HOST, "mc.etheryo.fr");
-    ssh_options_set(session, SSH_OPTIONS_USER, "root");
-    ssh_options_set(session, SSH_OPTIONS_PORT, &PORT);
-    if (ssh_connect(session) != SSH_OK)
+    ssh_options_set(_session, SSH_OPTIONS_HOST, "mc.etheryo.fr");
+    ssh_options_set(_session, SSH_OPTIONS_USER, "root");
+    ssh_options_set(_session, SSH_OPTIONS_PORT, &PORT);
+    if (ssh_connect(_session) != SSH_OK)
     {
-        reason = ssh_get_error(session);
-        ssh_free(session);
+        reason = ssh_get_error(_session);
         throw VPSError(VPSErrorEnum::SSH_CONNECTION_FAIL, reason);
     }
 
-    if (ssh_userauth_publickey_auto(session, NULL, NULL) != SSH_AUTH_SUCCESS)
+    if (ssh_userauth_publickey_auto(_session, NULL, NULL) != SSH_AUTH_SUCCESS)
     {
-        reason = ssh_get_error(session);
-        ssh_disconnect(session);
-        ssh_free(session);
+        reason = ssh_get_error(_session);
         throw VPSError(VPSErrorEnum::SSH_AUTH_FAIL, reason);
     }
+
+    // Just Checking if connection works
+    _channel = ssh_channel_new(_session);
+    if (ssh_channel_open_session(_channel) != SSH_OK)
+    {
+        reason = ssh_get_error(_session);
+        throw VPSError(VPSErrorEnum::SSH_CHANNEL_FAIL, reason);
+    }
+    ssh_channel_send_eof(_channel);
+    ssh_channel_close(_channel);
+    ssh_channel_free(_channel);
+    _channel = nullptr;
 }
 
-/*
-#include <libssh/libssh.h>
-#include <stdlib.h>
-#include <stdio.h>
+void SSH::send_cmd(const char *cmd) noexcept
+{
+    _stdout.clear();
+    _stderr.clear();
 
-int main() {
-    ssh_session session = ssh_new();
-    if (session == NULL) return -1;
+    _channel = ssh_channel_new(_session);
+    ssh_channel_open_session(_channel);
+    ssh_channel_request_exec(_channel, cmd);
+    int nbytes;
+    while ((nbytes = ssh_channel_read(_channel, BUFFER, BUFFER_SIZE, 0)) > 0)
+        _stdout.append(BUFFER);
 
-    // --- Connection setup ---
-    ssh_options_set(session, SSH_OPTIONS_HOST, "my.server.com");
-    ssh_options_set(session, SSH_OPTIONS_USER, "myuser");
-    ssh_options_set(session, SSH_OPTIONS_PORT, &(int){22});
+    while ((nbytes = ssh_channel_read(_channel, BUFFER, BUFFER_SIZE, 1)) > 0)
+        _stderr.append(BUFFER);
 
-    if (ssh_connect(session) != SSH_OK) {
-        fprintf(stderr, "Error connecting: %s\n", ssh_get_error(session));
-        ssh_free(session);
-        return -1;
-    }
-
-    // --- Authenticate with keys ---
-    if (ssh_userauth_publickey_auto(session, NULL, NULL) != SSH_AUTH_SUCCESS) {
-        fprintf(stderr, "Auth failed: %s\n", ssh_get_error(session));
-        ssh_disconnect(session);
-        ssh_free(session);
-        return -1;
-    }
-
-    // --- Run a command remotely ---
-    ssh_channel channel = ssh_channel_new(session);
-    ssh_channel_open_session(channel);
-    ssh_channel_request_exec(channel,
-        "echo 'say Hello from libssh' > /var/run/minecraft.stdin");
-
-    ssh_channel_close(channel);
-    ssh_channel_free(channel);
-
-    ssh_disconnect(session);
-    ssh_free(session);
-
-    return 0;
+    ssh_channel_send_eof(_channel);
+    ssh_channel_close(_channel);
+    ssh_channel_free(_channel);
+    _channel = nullptr;
 }
 
-*/
+std::string& SSH::get_stdout() noexcept
+{
+    return _stdout;
+}
+
+std::string& SSH::get_stderr() noexcept
+{
+    return _stderr;
+}
