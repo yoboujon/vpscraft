@@ -12,23 +12,40 @@ elseif(UNIX AND NOT APPLE)
 endif()
 
 # Files
-qt_generate_deploy_app_script(
-    TARGET ${APP_NAME}
-    OUTPUT_SCRIPT deploy_script
-    NO_UNSUPPORTED_PLATFORM_ERROR
-)
-install(
-    SCRIPT
-    ${deploy_script}
-    COMPONENT major
-)
-install(
-    TARGETS ${APP_NAME} ${APP_NAME_LOW}_lib
-    BUNDLE  DESTINATION ${APP_DESTINATION}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-    COMPONENT major
-)
+if(WIN32)
+    set(deploy_tool_options_arg
+        --release
+    )
+    qt_generate_deploy_app_script(
+        TARGET ${APP_NAME}
+        OUTPUT_SCRIPT deploy_script
+        NO_UNSUPPORTED_PLATFORM_ERROR
+        NO_TRANSLATIONS
+        DEPLOY_TOOL_OPTIONS ${deploy_tool_options_arg}
+    )
+    install(
+        SCRIPT
+        ${deploy_script}
+        COMPONENT major
+    )
 
+    string(REPLACE "\\" "/" VCPKG_PATH $ENV{VCPKG_ROOT})
+    file(GLOB OPENSSL_DLLS
+        "${VCPKG_PATH}/installed/x64-windows/bin/ssh.dll"
+        "${VCPKG_PATH}/installed/x64-windows/bin/libcrypto*.dll"
+    )
+    install(
+        FILES ${OPENSSL_DLLS}
+        DESTINATION ${CMAKE_INSTALL_BINDIR}
+        COMPONENT major
+    )
+endif()
+install(
+    TARGETS ${APP_NAME} ${APP_NAME_LOW}_cli ${APP_NAME_LOW}_lib
+    RUNTIME
+    DESTINATION ${CMAKE_INSTALL_BINDIR}
+    COMPONENT major
+)
 # Config
 cpack_add_component(
     major
