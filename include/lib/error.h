@@ -16,11 +16,13 @@ class VPSError : public std::exception
 {
 public:
     VPSError(VPSErrorEnum code, const std::string& arg="");
+    const char* what() const noexcept override;
     int code() const noexcept;
     const std::string& more() const noexcept;
 private:
-    int _code;
+    std::string _what;
     std::string _more;
+    int _code;
 };
 
 #endif // VPSCRAFT_ERROR

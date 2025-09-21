@@ -4,6 +4,7 @@
 #include "lib/ssh.h"
 #include <unordered_map>
 #include <string>
+#include <vector>
 
 class VPSCraft {
 public:

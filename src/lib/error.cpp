@@ -13,8 +13,13 @@ const char *_to_what(VPSErrorEnum error)
 }
 
 VPSError::VPSError(VPSErrorEnum code, const std::string& arg)
-    : std::exception(_to_what(code)), _code(static_cast<int>(code)), _more(arg)
+    : std::exception(), _what(_to_what(code)), _more(arg), _code(static_cast<int>(code))
 {
+}
+
+const char* VPSError::what() const noexcept
+{
+    return _what.c_str();
 }
 
 int VPSError::code() const noexcept
