@@ -3,7 +3,7 @@ if(WIN32)
     set(APP_DESTINATION ".")
     set(LIB_DESTINATION "lib")
     set(DOC_DESTINATION "docs")
-    set(CPACK_GENERATOR "NSIS")
+    set(CPACK_GENERATOR "INNOSETUP")
 elseif(UNIX AND NOT APPLE)
     set(APP_DESTINATION "")
     set(LIB_DESTINATION "")
@@ -14,19 +14,19 @@ endif()
 # Files
 if(WIN32)
     set(deploy_tool_options_arg
-        --release
+    --release
     )
     qt_generate_deploy_app_script(
-        TARGET ${APP_NAME}
-        OUTPUT_SCRIPT deploy_script
-        NO_UNSUPPORTED_PLATFORM_ERROR
-        NO_TRANSLATIONS
-        DEPLOY_TOOL_OPTIONS ${deploy_tool_options_arg}
+    TARGET ${APP_NAME}
+    OUTPUT_SCRIPT deploy_script
+    NO_UNSUPPORTED_PLATFORM_ERROR
+    NO_TRANSLATIONS
+    DEPLOY_TOOL_OPTIONS ${deploy_tool_options_arg}
     )
     install(
-        SCRIPT
-        ${deploy_script}
-        COMPONENT major
+    SCRIPT
+    ${deploy_script}
+    COMPONENT major
     )
 
     string(REPLACE "\\" "/" VCPKG_PATH $ENV{VCPKG_ROOT})
@@ -54,23 +54,16 @@ cpack_add_component(
     REQUIRED
 )
 
-# NSIS
-set(CPACK_NSIS_CREATE_ICONS_EXTRA
-    "CreateShortCut '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\${APP_NAME}.lnk' '$INSTDIR\\\\bin\\\\${APP_NAME}.exe'"
-    "CreateShortCut '$DESKTOP\\\\${APP_NAME}.lnk' '$INSTDIR\\\\bin\\\\${APP_NAME}.exe'"
-)
-set(CPACK_NSIS_DELETE_ICONS_EXTRA
-    "Delete '$SMPROGRAMS\\\\$STARTMENU_FOLDER\\\\${APP_NAME}.lnk'"
-    "Delete '$DESKTOP\\\\${APP_NAME}.lnk'"
-)
-set(CPACK_NSIS_MUI_WELCOMEFINISHPAGE_BITMAP "${CMAKE_CURRENT_SOURCE_DIR}\\\\res\\\\welcome.bmp")
-set(CPACK_NSIS_MUI_ICON "${CMAKE_CURRENT_SOURCE_DIR}\\\\res\\\\icon_install.ico")
-set(CPACK_NSIS_MUI_UNIICON "${CMAKE_CURRENT_SOURCE_DIR}\\\\res\\\\icon_remove.ico")
-set(CPACK_NSIS_DISPLAY_NAME "${APP_NAME}")
-set(CPACK_NSIS_INSTALLED_ICON_NAME "${APP_NAME}")
-set(CPACK_NSIS_MUI_LICENSE_PAGE ON)
-set(CPACK_NSIS_URL_INFO_ABOUT "https://etheryo.fr")
-set(CPACK_NSIS_CONTACT "yoboujon@etheryo.fr")
+# Inno Setup
+set(CPACK_INNOSETUP_SETUP_DisableWelcomePage OFF)
+set(CPACK_INNOSETUP_SETUP_DisableProgramGroupPage ON)
+set(CPACK_INNOSETUP_SETUP_WizardImageFile "${CMAKE_CURRENT_SOURCE_DIR}/res/welcome.bmp")
+set(CPACK_INNOSETUP_SETUP_UninstallDisplayIcon "${CMAKE_CURRENT_SOURCE_DIR}/res/icon.ico")
+set(CPACK_INNOSETUP_SETUP_DisableFinishedPage OFF)
+# set(CPACK_INNOSETUP_SETUP_WizardSmallImageFile "${CMAKE_CURRENT_SOURCE_DIR}/res/icon.bmp")
+set(CPACK_INNOSETUP_EXTRA_SCRIPTS "${CMAKE_CURRENT_SOURCE_DIR}/cmake/setup.iss")
+set(CPACK_INNOSETUP_USE_MODERN_WIZARD ON)
+set(CPACK_INNOSETUP_ICON_FILE "${CMAKE_CURRENT_SOURCE_DIR}/res/icon_install.ico")
 
 # RPM
 set(CPACK_RPM_PACKAGE_RELEASE_DIST  ON)

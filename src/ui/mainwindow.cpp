@@ -4,6 +4,7 @@
 #include <QApplication>
 #include <QTimer>
 #include <QGraphicsColorizeEffect>
+#include <QString>
 #include <unordered_map>
 
 #include "lib/error.h"
@@ -71,8 +72,8 @@ MainWindow::~MainWindow()
 
 void MainWindow::setError(const std::string &title, const std::string &description)
 {
-    error.setText(QString::fromUtf8(title));
-    error.setInformativeText(QString::fromUtf8(description));
+    error.setText(QString::fromStdString(title));
+    error.setInformativeText(QString::fromStdString(description));
 }
 
 void MainWindow::updateInstances()
@@ -135,7 +136,7 @@ void MainWindow::onSSHClicked()
 void MainWindow::onStarted(const char *instance)
 {
     info.setWindowTitle("Starting Instance...");
-    info.setText(QString::fromUtf8(std::string("Starting '") + instance + "'..."));
+    info.setText(QString::fromStdString(std::string("Starting '") + instance + "'..."));
     info.show();
     QCoreApplication::processEvents();
     // Disabling buttons, setting instance
